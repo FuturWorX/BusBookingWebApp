@@ -1,14 +1,17 @@
 "use client"
 
 import type React from "react"
+import axios from 'axios'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PhoneIcon, MailIcon, BuildingIcon, ShieldIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Booking } from "@/commontypes/booking"
+import { get } from "http"
 
 export default function UserProfile() {
   const [userData, setUserData] = useState({
@@ -20,6 +23,8 @@ export default function UserProfile() {
     employeeId: "EX-12345",
     profileImage: "",
   })
+
+  const [booking, setBooking] = useState<Booking | null>(null);
 
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -38,6 +43,24 @@ export default function UserProfile() {
     }, 1000)
   }
 
+  useEffect(()=>{
+    getBooking();
+  },[])
+
+  const getBooking = async ()=>{
+        try {
+          const response = await axios.get(
+            "http://localhost:3000/api/booking/UDceiyntAoUj6l1CgNiC"
+          );
+          if (response.status === 200) {
+            const bookingData = response.data.booking;
+            setBooking(bookingData);
+          }
+        } catch (error) {
+          console.error("Error fetching booking data:", error);
+        } 
+  }
+
   const getInitials = () => {
     return `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`
   }
@@ -45,14 +68,21 @@ export default function UserProfile() {
   return (
     <Card className="border border-slate-200 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-xl text-secondary font-exxaro">Personal Information</CardTitle>
-        <CardDescription className="font-exxaro">Update your personal details and contact information</CardDescription>
+        <CardTitle className="text-xl text-secondary font-exxaro">
+          Personal Information
+        </CardTitle>
+        <CardDescription className="font-exxaro">
+          Update your personal details and contact information
+        </CardDescription>
       </CardHeader>
+      <img src={booking?.qrCodeUrl} alt="Booking QR Code" />
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center justify-center">
           <Avatar className="w-24 h-24">
             <AvatarImage src={userData.profileImage} />
-            <AvatarFallback className="bg-primary/20 text-primary text-xl font-exxaro">{getInitials()}</AvatarFallback>
+            <AvatarFallback className="bg-primary/20 text-primary text-xl font-exxaro">
+              {getInitials()}
+            </AvatarFallback>
           </Avatar>
           {isEditing && (
             <div className="mt-2">
@@ -71,8 +101,8 @@ export default function UserProfile() {
                   if (e.target.files && e.target.files[0]) {
                     // In a real app, you would upload this to a server
                     // For now, we'll just create a local URL
-                    const url = URL.createObjectURL(e.target.files[0])
-                    setUserData((prev) => ({ ...prev, profileImage: url }))
+                    const url = URL.createObjectURL(e.target.files[0]);
+                    setUserData((prev) => ({ ...prev, profileImage: url }));
                   }
                 }}
               />
@@ -189,10 +219,19 @@ export default function UserProfile() {
       <CardFooter className="flex justify-end gap-2 border-t pt-4">
         {isEditing ? (
           <>
-            <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving} className="font-exxaro">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditing(false)}
+              disabled={isSaving}
+              className="font-exxaro"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isSaving} className="font-exxaro">
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="font-exxaro"
+            >
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </>
@@ -203,6 +242,6 @@ export default function UserProfile() {
         )}
       </CardFooter>
     </Card>
-  )
+  );
 }
 
