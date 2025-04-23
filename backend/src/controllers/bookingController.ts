@@ -11,7 +11,7 @@ import {
   Timestamp,
   getDocs,
 } from "firebase/firestore";
-import { Booking } from "../../../commontypes/booking";
+import { Booking } from "../../commontypes/booking";
 import { bookingSchema } from "../zod/booking.schema";
 import QRCode from "qrcode";
 
@@ -223,3 +223,6 @@ export const deleteBooking = async (
     res.status(500).json({ error: "Failed to delete booking" });
   }
 };
+
+
+
